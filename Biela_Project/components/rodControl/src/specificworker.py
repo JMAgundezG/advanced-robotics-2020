@@ -20,7 +20,8 @@
 #
 
 from genericworker import *
-
+import cv2
+import b0RemoteApi
 # If RoboComp was compiled with Python bindings you can use InnerModel in Python
 # sys.path.append('/opt/robocomp/lib')
 # import librobocomp_qmat
@@ -32,8 +33,10 @@ class SpecificWorker(GenericWorker):
 		super(SpecificWorker, self).__init__(proxy_map)
 		self.Period = 2000
 		self.timer.start(self.Period)
-
 		self.rodMachine.start()
+		# CLIENTE
+		# OBJETIVO
+		# BASE
 
 	def __del__(self):
 		print('SpecificWorker destructor')
@@ -46,6 +49,10 @@ class SpecificWorker(GenericWorker):
 		#	print("Error reading config params")
 		return True
 
+	@QtCore.Slot()
+	def detectCircle(self):
+		image = self.camerargbdsimple_proxy.getImage()
+		return True
 
 # =============== Slots methods for State Machine ===================
 # ===================================================================
@@ -55,6 +62,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_initialize(self):
 		print("Entered state initialize")
+		self.t_initialize_to_detectCircle.emit()
 		pass
 
 	#
@@ -63,6 +71,11 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_detectCircle(self):
 		print("Entered state detectCircle")
+		while(not self.detectCircle()):
+			pass
+
+		self.t_detectCircle_to_moveArm.emit()
+
 		pass
 
 	#
@@ -71,6 +84,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_dropRod(self):
 		print("Entered state dropRod")
+		self.t_dropRod_to_finalize.emit()
 		pass
 
 	#
@@ -79,6 +93,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_moveArm(self):
 		print("Entered state moveArm")
+		self.t_moveArm_to_takeRod.emit()
 		pass
 
 	#
@@ -87,6 +102,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_moveRod(self):
 		print("Entered state moveRod")
+		self.t_moveRod_to_dropRod.emit()
 		pass
 
 	#
@@ -95,6 +111,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_takeRod(self):
 		print("Entered state takeRod")
+		self.t_takeRod_to_moveRod.emit()
 		pass
 
 	#
@@ -103,6 +120,7 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_finalize(self):
 		print("Entered state finalize")
+		self.kill.emit()
 		pass
 
 
@@ -115,7 +133,8 @@ class SpecificWorker(GenericWorker):
 	#
 	def CameraRGBDSimplePub_pushRGBD(self, im, dep):
 		#
-		#subscribesToCODE
+		cv2.imshow("im", im)
+		cw2.waitKey()
 		#
 		pass
 
