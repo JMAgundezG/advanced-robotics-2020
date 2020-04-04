@@ -2,14 +2,17 @@
 /* CHANGE THE NAME OF THE MACHINE IF YOU MAKE
    ANY CHANGE TO THE DEFAULT STATES OR TRANSITIONS */
 
-defaultMachine{
-    states compute;
+rodMachine{
+    states detectCircle, moveArm, takeRod, moveRod, dropRod;
     initial_state initialize;
     end_state finalize;
     transitions{
-        initialize => compute;
-        compute => compute;
-        compute => finalize;
+        initialize => detectCircle;
+        detectCircle => moveArm;
+        moveArm => takeRod;
+        takeRod => moveRod;
+        moveRod => dropRod;
+        dropRod => finalize;
     };
 };
 

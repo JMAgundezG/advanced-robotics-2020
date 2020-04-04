@@ -77,9 +77,12 @@ class GenericWorker(QtCore.QObject):
 
 	kill = QtCore.Signal()
 #Signals for State Machine
-	t_initialize_to_compute = QtCore.Signal()
-	t_compute_to_compute = QtCore.Signal()
-	t_compute_to_finalize = QtCore.Signal()
+	t_initialize_to_detectCircle = QtCore.Signal()
+	t_detectCircle_to_moveArm = QtCore.Signal()
+	t_moveArm_to_takeRod = QtCore.Signal()
+	t_takeRod_to_moveRod = QtCore.Signal()
+	t_moveRod_to_dropRod = QtCore.Signal()
+	t_dropRod_to_finalize = QtCore.Signal()
 
 #-------------------------
 
@@ -95,33 +98,63 @@ class GenericWorker(QtCore.QObject):
 		self.timer = QtCore.QTimer(self)
 
 #State Machine
-		self.defaultMachine= QtCore.QStateMachine()
-		self.compute_state = QtCore.QState(self.defaultMachine)
-		self.initialize_state = QtCore.QState(self.defaultMachine)
+		self.rodMachine= QtCore.QStateMachine()
+		self.detectCircle_state = QtCore.QState(self.rodMachine)
+		self.moveArm_state = QtCore.QState(self.rodMachine)
+		self.takeRod_state = QtCore.QState(self.rodMachine)
+		self.moveRod_state = QtCore.QState(self.rodMachine)
+		self.dropRod_state = QtCore.QState(self.rodMachine)
+		self.initialize_state = QtCore.QState(self.rodMachine)
 
-		self.finalize_state = QtCore.QFinalState(self.defaultMachine)
+		self.finalize_state = QtCore.QFinalState(self.rodMachine)
 
 
 #------------------
 #Initialization State machine
-		self.initialize_state.addTransition(self.t_initialize_to_compute, self.compute_state)
-		self.compute_state.addTransition(self.t_compute_to_compute, self.compute_state)
-		self.compute_state.addTransition(self.t_compute_to_finalize, self.finalize_state)
+		self.initialize_state.addTransition(self.t_initialize_to_detectCircle, self.detectCircle_state)
+		self.detectCircle_state.addTransition(self.t_detectCircle_to_moveArm, self.moveArm_state)
+		self.moveArm_state.addTransition(self.t_moveArm_to_takeRod, self.takeRod_state)
+		self.takeRod_state.addTransition(self.t_takeRod_to_moveRod, self.moveRod_state)
+		self.moveRod_state.addTransition(self.t_moveRod_to_dropRod, self.dropRod_state)
+		self.dropRod_state.addTransition(self.t_dropRod_to_finalize, self.finalize_state)
 
 
-		self.compute_state.entered.connect(self.sm_compute)
+		self.detectCircle_state.entered.connect(self.sm_detectCircle)
+		self.moveArm_state.entered.connect(self.sm_moveArm)
+		self.takeRod_state.entered.connect(self.sm_takeRod)
+		self.moveRod_state.entered.connect(self.sm_moveRod)
+		self.dropRod_state.entered.connect(self.sm_dropRod)
 		self.initialize_state.entered.connect(self.sm_initialize)
 		self.finalize_state.entered.connect(self.sm_finalize)
-		self.timer.timeout.connect(self.t_compute_to_compute)
 
-		self.defaultMachine.setInitialState(self.initialize_state)
+		self.rodMachine.setInitialState(self.initialize_state)
 
 #------------------
 
 #Slots funtion State Machine
 	@QtCore.Slot()
-	def sm_compute(self):
-		print("Error: lack sm_compute in Specificworker")
+	def sm_detectCircle(self):
+		print("Error: lack sm_detectCircle in Specificworker")
+		sys.exit(-1)
+
+	@QtCore.Slot()
+	def sm_moveArm(self):
+		print("Error: lack sm_moveArm in Specificworker")
+		sys.exit(-1)
+
+	@QtCore.Slot()
+	def sm_takeRod(self):
+		print("Error: lack sm_takeRod in Specificworker")
+		sys.exit(-1)
+
+	@QtCore.Slot()
+	def sm_moveRod(self):
+		print("Error: lack sm_moveRod in Specificworker")
+		sys.exit(-1)
+
+	@QtCore.Slot()
+	def sm_dropRod(self):
+		print("Error: lack sm_dropRod in Specificworker")
 		sys.exit(-1)
 
 	@QtCore.Slot()
