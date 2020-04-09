@@ -1,9 +1,5 @@
-# Endpoints for subscriptions
-CameraRGBDSimplePubTopic.Endpoints=tcp -p 0
-
-
 # Proxies for required interfaces
-CameraRGBDSimpleProxy = camerargbdsimple:tcp -h localhost -p 0
+CameraRGBDSimpleProxy = camerargbdsimple:tcp -h localhost -p 10178
 
 
 

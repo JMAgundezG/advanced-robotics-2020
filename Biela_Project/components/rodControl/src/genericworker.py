@@ -44,18 +44,6 @@ except:
 	print('SLICE_PATH environment variable was not exported. Using only the default paths')
 	pass
 
-ice_CameraRGBDSimplePub = False
-for p in icePaths:
-	if os.path.isfile(p+'/CameraRGBDSimplePub.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"CameraRGBDSimplePub.ice"
-		Ice.loadSlice(wholeStr)
-		ice_CameraRGBDSimplePub = True
-		break
-if not ice_CameraRGBDSimplePub:
-	print('Couln\'t load CameraRGBDSimplePub')
-	sys.exit(-1)
-from RoboCompCameraRGBDSimplePub import *
 ice_CameraRGBDSimple = False
 for p in icePaths:
 	if os.path.isfile(p+'/CameraRGBDSimple.ice'):
@@ -70,7 +58,6 @@ if not ice_CameraRGBDSimple:
 from RoboCompCameraRGBDSimple import *
 
 
-from camerargbdsimplepubI import *
 
 
 class GenericWorker(QtCore.QObject):

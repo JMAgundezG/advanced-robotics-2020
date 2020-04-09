@@ -21,7 +21,6 @@
 
 from genericworker import *
 import cv2
-import b0RemoteApi
 # If RoboComp was compiled with Python bindings you can use InnerModel in Python
 # sys.path.append('/opt/robocomp/lib')
 # import librobocomp_qmat
@@ -33,10 +32,8 @@ class SpecificWorker(GenericWorker):
 		super(SpecificWorker, self).__init__(proxy_map)
 		self.Period = 2000
 		self.timer.start(self.Period)
+
 		self.rodMachine.start()
-		# CLIENTE
-		# OBJETIVO
-		# BASE
 
 	def __del__(self):
 		print('SpecificWorker destructor')
@@ -52,8 +49,12 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def detectCircle(self):
 		image = self.camerargbdsimple_proxy.getImage()
+		print("datos cogidos")
+		print(image)
 		return True
 
+# =============== Slots methods for State Machine ===================
+# ===================================================================
 # =============== Slots methods for State Machine ===================
 # ===================================================================
 	#
@@ -124,17 +125,7 @@ class SpecificWorker(GenericWorker):
 		pass
 
 
+
 # =================================================================
 # =================================================================
-
-
-	#
-	# pushRGBD
-	#
-	def CameraRGBDSimplePub_pushRGBD(self, im, dep):
-		#
-		cv2.imshow("im", im)
-		cw2.waitKey()
-		#
-		pass
 

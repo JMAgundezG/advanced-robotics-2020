@@ -107,15 +107,6 @@ if __name__ == '__main__':
 	for i in ic.getProperties():
 		parameters[str(i)] = str(ic.getProperties().getProperty(i))
 
-	# Topic Manager
-	proxy = ic.getProperties().getProperty("TopicManager.Proxy")
-	obj = ic.stringToProxy(proxy)
-	try:
-		topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
-	except Ice.ConnectionRefusedException as e:
-		print('Cannot connect to IceStorm! ('+proxy+')')
-		status = 1
-
 	# Remote object connection for CameraRGBDSimple
 	try:
 		proxyString = ic.getProperties().getProperty('CameraRGBDSimpleProxy')
@@ -138,29 +129,6 @@ if __name__ == '__main__':
 	else:
 		print("Error getting required connections, check config file")
 		sys.exit(-1)
-
-	CameraRGBDSimplePub_adapter = ic.createObjectAdapter("CameraRGBDSimplePubTopic")
-	camerargbdsimplepubI_ = CameraRGBDSimplePubI(worker)
-	camerargbdsimplepub_proxy = CameraRGBDSimplePub_adapter.addWithUUID(camerargbdsimplepubI_).ice_oneway()
-
-	subscribeDone = False
-	while not subscribeDone:
-		try:
-			camerargbdsimplepub_topic = topicManager.retrieve("CameraRGBDSimplePub")
-			subscribeDone = True
-		except Ice.Exception as e:
-			print("Error. Topic does not exist (creating)")
-			time.sleep(1)
-			try:
-				camerargbdsimplepub_topic = topicManager.create("CameraRGBDSimplePub")
-				subscribeDone = True
-			except:
-				print("Error. Topic could not be created. Exiting")
-				status = 0
-	qos = {}
-	camerargbdsimplepub_topic.subscribeAndGetPublisher(qos, camerargbdsimplepub_proxy)
-	CameraRGBDSimplePub_adapter.activate()
-
 
 	signal.signal(signal.SIGINT, sigint_handler)
 	app.exec_()
