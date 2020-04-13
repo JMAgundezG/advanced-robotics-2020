@@ -79,6 +79,8 @@ class SpecificWorker(GenericWorker):
 
 		if self.display:
 			self.displayImage(image, resolution)
+		
+		print(self.t_image.width, " H: ", self.t_image.height)
 
 		return True
 

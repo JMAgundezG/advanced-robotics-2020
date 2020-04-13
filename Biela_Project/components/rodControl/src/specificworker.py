@@ -21,6 +21,7 @@
 
 from genericworker import *
 import cv2
+import numpy as np
 # If RoboComp was compiled with Python bindings you can use InnerModel in Python
 # sys.path.append('/opt/robocomp/lib')
 # import librobocomp_qmat
@@ -48,9 +49,16 @@ class SpecificWorker(GenericWorker):
 
 	@QtCore.Slot()
 	def detectCircle(self):
-		image = self.camerargbdsimple_proxy.getImage()
-		print("datos cogidos")
-		print(image)
+		# image is a structure that contains cameraID, width, height, focalx, focaly, alivetime, TypeImage image
+		self.image = self.camerargbdsimple_proxy.getImage()
+		print("cameraID: ", self.image.cameraID)
+		# change image to grey and call HoughCircles
+		img1 = np.frombuffer(self.image.image)
+		print("size: ", img1.shape)
+		print("width: ", self.image.width)
+		print("height: ", self.image.height)
+		grayImage     = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+		circlesImage  = cv2.HoughCircles(grayImage, cv2.HOUGH_GRADIENT, 1.8, 100)
 		return True
 
 # =============== Slots methods for State Machine ===================
