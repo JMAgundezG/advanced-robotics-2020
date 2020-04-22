@@ -67,7 +67,7 @@ class SpecificWorker(GenericWorker):
 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 		# change image to grey and call HoughCircles
 		grayImage     = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-		circlesImage  = cv2.HoughCircles(grayImage, cv2.HOUGH_GRADIENT, 1.8, 100)
+		circlesImage  = cv2.HoughCircles(grayImage, cv2.HOUGH_GRADIENT, 1.2, 100)
 		print(circlesImage[0])
 		
 		for (x, y, r) in circlesImage[0]:
