@@ -95,7 +95,6 @@ class SpecificWorker(GenericWorker):
 	def moveArm(self):
 
 		depth_ = self.camerargbdsimple_proxy.getDepth()
-		print(depth_.__dict__)
 		self.depth = np.frombuffer(depth_.depth, dtype=np.float32).reshape(depth_.height, depth_.width)
 		ki = self.keypoint[0] - 320
 		kj = 240 - self.keypoint[1]
@@ -105,7 +104,7 @@ class SpecificWorker(GenericWorker):
 			self.keypoint.append(pdepth)
 			self.keypoint[0] = ki * self.keypoint[2] / 462
 			self.keypoint[1] = kj * self.keypoint[2] / 462
-			movement = self.client.simxSetObjectPosition(self.target,-1, self.keypoint, self.client.simxServiceCall())		
+			movement = self.client.simxSetObjectPosition(self.target, self.target, self.keypoint, self.client.simxServiceCall())		
 		return True
 
 # =============== Slots methods for State Machine ===================
