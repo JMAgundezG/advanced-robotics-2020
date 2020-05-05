@@ -41,6 +41,7 @@ class SpecificWorker(GenericWorker):
 		self.target = self.client.simxGetObjectHandle('target', self.client.simxServiceCall())[1]
 		self.base = self.client.simxGetObjectHandle('UR3', self.client.simxServiceCall())[1]
 		self.biela = self.client.simxGetObjectHandle('Shape5', self.client.simxServiceCall())[1]
+		self.pinza = self.client.simxGetObjectHandle('Camera_hand', self.client.simxServiceCall())[1]
 
 		self.rodMachine.start()
 
@@ -74,18 +75,13 @@ class SpecificWorker(GenericWorker):
 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 		# change image to grey and call HoughCircles
 		grayImage     = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-		circlesImage  = cv2.HoughCircles(grayImage, cv2.HOUGH_GRADIENT, 1.2, 100)
-<<<<<<< HEAD
-=======
-		print(circlesImage[0])
->>>>>>> 265ced61a6523345b7ada6f4c96e2221ba0445b4
-		
+		circlesImage  = cv2.HoughCircles(grayImage, cv2.HOUGH_GRADIENT, 1.2, 100)		
 		if circlesImage is not None:
 			for (x, y, r) in circlesImage[0]:
 				x = math.ceil(x)
 				y = math.ceil(y)
 				r = math.ceil(r)
-				self.keypoint = [x, y, z]
+				self.keypoint = [x, y]
 				cv2.circle(img, (x, y), r, (255, 255, 255), 4)
 				cv2.rectangle(img, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
 				#cv2.imshow("Camera_hand", img)
@@ -97,17 +93,19 @@ class SpecificWorker(GenericWorker):
 
 	@QtCore.Slot()
 	def moveArm(self):
+
 		depth_ = self.camerargbdsimple_proxy.getDepth()
+		print(depth_.__dict__)
 		self.depth = np.frombuffer(depth_.depth, dtype=np.float32).reshape(depth_.height, depth_.width)
 		ki = self.keypoint[0] - 320
 		kj = 240 - self.keypoint[1]
-		pdepth = float(getDepth2(self.depth, this.keypoint[0], this.keypoint[1]))
+		pdepth = float(self.depth[self.keypoint[0]][self.keypoint[1]])
 
 		if pdepth < 10000 and pdepth > 0:
-			self.keypoint[2] = pdepth
+			self.keypoint.append(pdepth)
 			self.keypoint[0] = ki * self.keypoint[2] / 462
 			self.keypoint[1] = kj * self.keypoint[2] / 462
-			movement = self.client.simxSetObjectPosition(self.target,-1, set(self.keypoint), self.client.simxServiceCall())		
+			movement = self.client.simxSetObjectPosition(self.target,-1, self.keypoint, self.client.simxServiceCall())		
 		return True
 
 # =============== Slots methods for State Machine ===================
@@ -129,8 +127,9 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_detectCircle(self):
 		print("Entered state detectCircle")
-		while(not self.detectCircle()):
-			pass
+		while(True):
+			if self.detectCircle():
+				break
 		self.t_detectCircle_to_moveArm.emit()
 
 		pass
