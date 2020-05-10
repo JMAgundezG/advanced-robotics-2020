@@ -1,0 +1,9 @@
+import "CameraRGBDSimple.idsl";
+
+Component rodcontrol
+{
+  Communications
+  {
+  };
+  language python;
+};
