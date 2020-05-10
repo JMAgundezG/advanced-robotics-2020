@@ -124,14 +124,14 @@ class SpecificWorker(GenericWorker):
 
 		ki = self.keypoint[0] - 320
 		kj = 240 - self.keypoint[1]
-		pdepth = float(self.depth[self.keypoint[0]][self.keypoint[1]])
+		pdepth = float(self.camera_data['depth'][self.keypoint[0]][self.keypoint[1]])
 
 		if pdepth < 10000 and pdepth > 0:
 			self.keypoint.append(pdepth)
 			self.keypoint[0] = ki * self.keypoint[2] / 462
 			self.keypoint[1] = kj * self.keypoint[2] / 462
 			aa = (int(self.keypoint[0]), int(self.keypoint[1]), int(self.keypoint[2]))
-			movement = self.client.simxSetObjectPosition(self.a, self.target, aa, self.client.simxServiceCall())		
+			movement = self.client.simxSetObjectPosition(self.target, self.target, aa, self.client.simxServiceCall())		
 		return False
 
 	def __del__(self):
@@ -139,6 +139,7 @@ class SpecificWorker(GenericWorker):
 
 	def setParams(self, params):
 		#try:
+
 		#	self.innermodel = InnerModel(params["InnerModelPath"])
 		#except:
 		#	traceback.print_exc()

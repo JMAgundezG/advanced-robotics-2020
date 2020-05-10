@@ -25,6 +25,7 @@ import numpy as np
 import math
 import vrep
 import b0RemoteApi
+import time
 # If RoboComp was compiled with Python bindings you can use InnerModel in Python
 # sys.path.append('/opt/robocomp/lib')
 # import librobocomp_qmat
@@ -37,11 +38,26 @@ class SpecificWorker(GenericWorker):
 		self.Period = 2000
 		self.timer.start(self.Period)
 
+		# connecting to blue-zero client
 		self.client = b0RemoteApi.RemoteApiClient('b0RemoteApi_pythonClient-2','b0RemoteApiAddOn')
+
+		# if the client connects we take the object handlers
 		self.target = self.client.simxGetObjectHandle('target', self.client.simxServiceCall())[1]
 		self.base = self.client.simxGetObjectHandle('UR3', self.client.simxServiceCall())[1]
 		self.biela = self.client.simxGetObjectHandle('Shape5', self.client.simxServiceCall())[1]
 		self.pinza = self.client.simxGetObjectHandle('Camera_hand', self.client.simxServiceCall())[1]
+
+		handlers_list = [self.client.simxGetObjectHandle('target', self.client.simxServiceCall()),
+							self.client.simxGetObjectHandle('UR3', self.client.simxServiceCall()),
+							self.client.simxGetObjectHandle('Shape5', self.client.simxServiceCall()),
+							self.client.simxGetObjectHandle('Camera_hand', self.client.simxServiceCall())
+		]
+
+		if all(map(lambda x: x[0], handlers_list)):
+			print("[INFO] connected to all handler components")
+			self.target, self.base, self.rod, self.hand_camera = [i[1] for i in handlers_list]
+		else:
+			print("[WARNING] COULDN'T CONNECT TO SOME HANDLER COMPONENTS")
 
 		self.rodMachine.start()
 
@@ -96,6 +112,10 @@ class SpecificWorker(GenericWorker):
 
 		depth_ = self.camerargbdsimple_proxy.getDepth()
 		self.depth = np.frombuffer(depth_.depth, dtype=np.float32).reshape(depth_.height, depth_.width)
+		cv2.imshow("camera_depth", np.ceil(self.depth * 255))
+		print(self.depth)
+		time.sleep(1)
+		cv2.waitKey(5)
 		ki = self.keypoint[0] - 320
 		kj = 240 - self.keypoint[1]
 		pdepth = float(self.depth[self.keypoint[0]][self.keypoint[1]])
@@ -104,8 +124,9 @@ class SpecificWorker(GenericWorker):
 			self.keypoint.append(pdepth)
 			self.keypoint[0] = ki * self.keypoint[2] / 462
 			self.keypoint[1] = kj * self.keypoint[2] / 462
-			movement = self.client.simxSetObjectPosition(self.target, self.target, self.keypoint, self.client.simxServiceCall())		
-		return True
+			aa = (int(self.keypoint[0]), int(self.keypoint[1]), int(self.keypoint[2]))
+			movement = self.client.simxSetObjectPosition(self.a, self.target, aa, self.client.simxServiceCall())		
+		return False
 
 # =============== Slots methods for State Machine ===================
 # ===================================================================
@@ -139,7 +160,9 @@ class SpecificWorker(GenericWorker):
 	@QtCore.Slot()
 	def sm_dropRod(self):
 		print("Entered state dropRod")
-		self.moveArm()
+		while(True):
+			if self.moveArm():
+				break
 		self.t_dropRod_to_finalize.emit()
 		pass
 
