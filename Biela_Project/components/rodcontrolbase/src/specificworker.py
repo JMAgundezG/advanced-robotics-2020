@@ -56,7 +56,7 @@ class SpecificWorker(GenericWorker):
 		handlers_list = [self.client.simxGetObjectHandle('target', self.client.simxServiceCall()),
 							self.client.simxGetObjectHandle('UR3', self.client.simxServiceCall()),
 							self.client.simxGetObjectHandle('Shape5', self.client.simxServiceCall()),
-							self.client.simxGetObjectHandle('Camera_hand', self.client.simxServiceCall())
+							self.client.simxGetObjectHandle('Camera_hand', self.client.simxServiceCall()),
 		]
 		if all(map(lambda x: x[0], handlers_list)):
 			print("[INFO] connected to all handler components")
@@ -122,16 +122,33 @@ class SpecificWorker(GenericWorker):
 
 	def moveArm(self):
 
-		ki = self.keypoint[0] - 320
-		kj = 240 - self.keypoint[1]
-		pdepth = float(self.camera_data['depth'][self.keypoint[0]][self.keypoint[1]])
+		rod_position = self.client.simxGetObjectPosition(self.rod, -1, self.client.simxServiceCall())
+		target_position = self.client.simxGetObjectPosition(self.target, -1, self.client.simxServiceCall())
+		print("----", rod_position[0], target_position[0])
+		if rod_position[0] == target_position[0] == True:
+			rod_position = np.array(rod_position[1])
+			print("ROD ", rod_position)
+			target_position = np.array(target_position[1])
+			print("TARGET ", target_position)
+			distance = (target_position - rod_position)
+			print("DISTANCE: ", distance)
+			if not all(map(lambda x: x < 0.01, distance)):
+				mov = self.client.simxSetObjectPosition(self.target, -1, list(rod_position), self.client.simxServiceCall())
+				return False
+			else:
+				return True
 
-		if pdepth < 10000 and pdepth > 0:
-			self.keypoint.append(pdepth)
-			self.keypoint[0] = ki * self.keypoint[2] / 462
-			self.keypoint[1] = kj * self.keypoint[2] / 462
-			aa = (int(self.keypoint[0]), int(self.keypoint[1]), int(self.keypoint[2]))
-			movement = self.client.simxSetObjectPosition(self.target, self.target, aa, self.client.simxServiceCall())		
+
+		# ki = self.keypoint[0] - 320
+		# kj = 240 - self.keypoint[1]
+		# pdepth = float(self.camera_data['depth'][self.keypoint[0]][self.keypoint[1]])
+
+		# if pdepth < 10000 and pdepth > 0:
+		# 	self.keypoint.append(pdepth)
+		# 	self.keypoint[0] = ki * self.keypoint[2] / 462
+		# 	self.keypoint[1] = kj * self.keypoint[2] / 462
+		# 	aa = (int(self.keypoint[0]), int(self.keypoint[1]), int(self.keypoint[2]))
+		# 	movement = self.client.simxSetObjectPosition(self.target, self.target, aa, self.client.simxServiceCall())		
 		return False
 
 	def __del__(self):
